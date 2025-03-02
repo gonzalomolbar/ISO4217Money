@@ -1,0 +1,39 @@
+[project]
+name = "iso4217-money"
+version = "0.0.0" # This should be dynamically replaced by the pre-build.py script run in the CI/CD pipeline
+description = ""
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "Gonzalo Molpeceres Barrientos",email = "gonzalomolbar@gmail.com"}
+]
+keywords = [ "ISO4217", "Currency", "Money"]
+dependencies = []
+dynamic = [ "classifiers" ]
+
+[project.urls]
+repository = "https://github.com/gonzalomolbar/ISO4217Money"
+
+[tool.poetry]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+]
+packages = [{include = "iso4217_money"}]
+requires-poetry = ">=2.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "25.1.0"
+mypy = "1.15.0"
+ruff = "0.9.7"
+toml = "0.10.2"
+requests = "2.32.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "8.3.4"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
