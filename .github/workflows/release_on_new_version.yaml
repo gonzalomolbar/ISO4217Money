@@ -1,4 +1,4 @@
-name: Release on New Version
+name: Release on Updated ISO
 
 on:
   schedule:
@@ -9,7 +9,7 @@ permissions:
   contents: write  # Allow writing to the repository (needed for creating tags/releases)
 
 jobs:
-  check-for-new-version:
+  release-on-updated-iso:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,7 +23,7 @@ jobs:
           python-version: ">=3.12"
 
       - name: Run pre build script
-        run: | 
+        run: |
           pip install toml
           python pre_build.py
 
@@ -33,7 +33,8 @@ jobs:
           # Read the version from pyproject.toml
           package_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
           echo "Package version: $package_version"
-          echo "PACKAGE_VERSION=$package_version" >> $GITHUB_ENV  # Set environment variable
+          echo "PACKAGE_VERSION=$package_version" >> $GITHUB_ENV
+          echo "PACKAGE_PATCH_VERSION=$(echo "$package_version" | cut -d '.' -f 3)" >> $GITHUB_ENV
 
       - name: Get version from PyPI
         id: pypi_version
@@ -42,21 +43,22 @@ jobs:
           pip install requests
           pypi_version=$(python -c "import requests; response = requests.get('https://pypi.org/pypi/iso4217-money/json'); print(response.json()['info']['version'])")
           echo "Version on PyPI: $pypi_version"
-          echo "PYPI_VERSION=$pypi_version" >> $GITHUB_ENV  # Set environment variable
+          echo "PYPI_VERSION=$pypi_version" >> $GITHUB_ENV
+          echo "PYPI_PATCH_VERSION=$(echo "$pypi_version" | cut -d '.' -f 3)" >> $GITHUB_ENV
 
       - name: Check for new version
         id: check_version
         run: |
-          # Compare versions
-          echo "Checking for new version..."
-          echo "Package version: $PACKAGE_VERSION"
-          echo "PyPI version: $PYPI_VERSION"
-          if [ "$PACKAGE_VERSION" != "$PYPI_VERSION" ]; then
-            echo "New version detected: $PACKAGE_VERSION"
-            echo "NEW_VERSION=true" >> $GITHUB_ENV  # Set environment variable
+          echo "Package PATCH version: $PACKAGE_PATCH_VERSION"
+          echo "PyPI PATCH version: $PYPI_PATCH_VERSION"
+
+          # Compare PATCH versions
+          if [ "$PACKAGE_PATCH_VERSION" -gt "$PYPI_PATCH_VERSION" ]; then
+            echo "New PATCH version detected: $PACKAGE_VERSION"
+            echo "NEW_VERSION=true" >> $GITHUB_ENV
           else
-            echo "No new version detected."
-            echo "NEW_VERSION=false" >> $GITHUB_ENV  # Set environment variable
+            echo "No new PATCH version detected."
+            echo "NEW_VERSION=false" >> $GITHUB_ENV
           fi
 
       - name: Create Tag and Release
@@ -67,6 +69,6 @@ jobs:
           git push origin $PACKAGE_VERSION
 
           # Create a GitHub release
-          gh release create $PACKAGE_VERSION --title "Release $PACKAGE_VERSION" --notes "Release notes for version $PACKAGE_VERSION"
+          gh release create $PACKAGE_VERSION --title "Release $PACKAGE_VERSION" --notes "Auto update for PATCH $PACKAGE_PATCH_VERSION" --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

@@ -37,7 +37,7 @@ jobs:
         run: poetry config virtualenvs.create false
 
       - name: Run pre build script
-        run: | 
+        run: |
           pip install toml
           python pre_build.py
 

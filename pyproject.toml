@@ -1,6 +1,6 @@
 [project]
 name = "iso4217-money"
-version = "0.0.0" # This should be dynamically replaced by the pre-build.py script run in the CI/CD pipeline
+version = "0.2.20250204"
 description = ""
 license = { file = "LICENSE" }
 readme = "README.md"

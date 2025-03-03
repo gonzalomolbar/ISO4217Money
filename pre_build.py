@@ -16,7 +16,7 @@ ISO_4217_TABLE_PATH = os.path.join(
 PYPROJECT_PATH = os.path.join(os.path.dirname(__file__), "pyproject.toml")
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 2
+VERSION_MINOR = 3
 
 
 def download_iso_4217_currencies():
@@ -55,4 +55,4 @@ def update_version():
 
 if __name__ == "__main__":
     download_iso_4217_currencies()  # Download the ISO 4217 table
-    update_version()  # Update the version
+    # update_version()  # Update the version
