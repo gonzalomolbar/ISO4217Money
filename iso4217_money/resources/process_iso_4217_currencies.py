@@ -5,7 +5,7 @@ from iso4217_money.types import ISO4217Currency
 
 ISO_4217_TABLE_PATH = os.path.join(
     os.path.dirname(__file__),
-    "iso_4217_currencies.xml",
+    "iso4217_currencies.xml",
 )
 
 

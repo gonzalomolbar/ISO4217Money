@@ -22,53 +22,43 @@ jobs:
         with:
           python-version: ">=3.12"
 
-      - name: Run pre build script
-        run: |
-          pip install toml
-          python pre_build.py
+      - name: Install dependencies
+        run: pip install toml requests
 
-      - name: Get package version
-        id: get_version
-        run: |
-          # Read the version from pyproject.toml
-          package_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
-          echo "Package version: $package_version"
-          echo "PACKAGE_VERSION=$package_version" >> $GITHUB_ENV
-          echo "PACKAGE_PATCH_VERSION=$(echo "$package_version" | cut -d '.' -f 3)" >> $GITHUB_ENV
+      - name: Get ISO
+        run: python download_iso4217_currencies.py
 
-      - name: Get version from PyPI
-        id: pypi_version
+      - name: Update version in pyproject.toml
+        id: update_version
         run: |
-          # Fetch the version from PyPI using the requests library
-          pip install requests
-          pypi_version=$(python -c "import requests; response = requests.get('https://pypi.org/pypi/iso4217-money/json'); print(response.json()['info']['version'])")
-          echo "Version on PyPI: $pypi_version"
-          echo "PYPI_VERSION=$pypi_version" >> $GITHUB_ENV
-          echo "PYPI_PATCH_VERSION=$(echo "$pypi_version" | cut -d '.' -f 3)" >> $GITHUB_ENV
+          python update_version.py
 
-      - name: Check for new version
-        id: check_version
+      - name: Fail if the current version is not up to date
+        if: env.IS_CURRENT_VERSION_UP_TO_DATE != 'true'
         run: |
-          echo "Package PATCH version: $PACKAGE_PATCH_VERSION"
-          echo "PyPI PATCH version: $PYPI_PATCH_VERSION"
+          echo "The current version is not up to date. Stopping the workflow."
+          echo "PyPI version: ${{ env.PYPI_VERSION }}"
+          echo "Current version: ${{ env.CURRENT_VERSION }}"
+          exit 1
 
-          # Compare PATCH versions
-          if [ "$PACKAGE_PATCH_VERSION" -gt "$PYPI_PATCH_VERSION" ]; then
-            echo "New PATCH version detected: $PACKAGE_VERSION"
-            echo "NEW_VERSION=true" >> $GITHUB_ENV
-          else
-            echo "No new PATCH version detected."
-            echo "NEW_VERSION=false" >> $GITHUB_ENV
-          fi
+      - name: Commit changes to pyproject.toml
+        if: env.UPDATE_PATCH_VERSION == 'true'
+        run: |
+          echo "Committing changes to pyproject.toml"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pyproject.toml
+          git commit -m "Update version to ${{ env.NEW_VERSION }}"
+          git push origin HEAD
 
       - name: Create Tag and Release
-        if: env.NEW_VERSION == 'true'
+        if: env.UPDATE_PATCH_VERSION == 'true'
         run: |
-          echo "Creating tag and release for version $PACKAGE_VERSION"
-          git tag $PACKAGE_VERSION
-          git push origin $PACKAGE_VERSION
-
-          # Create a GitHub release
-          gh release create $PACKAGE_VERSION --title "Release $PACKAGE_VERSION" --notes "Auto update for PATCH $PACKAGE_PATCH_VERSION" --draft
+          echo "Creating tag and release for version ${{ env.NEW_VERSION }}"
+#          git tag ${{ env.NEW_VERSION }}
+#          git push origin ${{ env.NEW_VERSION }}
+#
+#          # Create a GitHub release
+#          gh release create ${{ env.NEW_VERSION }} --title "Release ${{ env.NEW_VERSION }}" --notes "Auto update for PATCH version" --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

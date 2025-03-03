@@ -23,4 +23,4 @@ eggs/
 Thumbs.db
 
 # Resources
-iso4217_money/resources/iso_4217_currencies.xml
+iso4217_money/resources/iso4217_currencies.xml
