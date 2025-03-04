@@ -1,6 +1,6 @@
 [project]
 name = "iso4217-money"
-version = "0.2.20250204"
+version = "0.3.0"
 description = ""
 license = { file = "LICENSE" }
 readme = "README.md"

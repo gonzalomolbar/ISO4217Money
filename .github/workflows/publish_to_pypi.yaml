@@ -36,10 +36,11 @@ jobs:
       - name: Update Poetry configuration
         run: poetry config virtualenvs.create false
 
-      - name: Run pre build script
-        run: |
-          pip install toml
-          python pre_build.py
+      - name: Install Script dependencies
+        run: pip install requests
+
+      - name: Download ISO 4217 currencies to local
+        run: python gha_download_iso4217_currencies.py
 
       - name: Package project
         run: poetry build

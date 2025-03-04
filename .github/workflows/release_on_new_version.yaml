@@ -22,16 +22,15 @@ jobs:
         with:
           python-version: ">=3.12"
 
-      - name: Install dependencies
+      - name: Install Script dependencies
         run: pip install toml requests
 
-      - name: Get ISO
-        run: python download_iso4217_currencies.py
+      - name: Download ISO 4217 currencies to local
+        run: python gha_download_iso4217_currencies.py
 
-      - name: Update version in pyproject.toml
-        id: update_version
+      - name: Retrieve versions and update if applies in pyproject.toml
         run: |
-          python update_version.py
+          python gha_retrieve_and_update_versions.py
 
       - name: Fail if the current version is not up to date
         if: env.IS_CURRENT_VERSION_UP_TO_DATE != 'true'
@@ -55,10 +54,10 @@ jobs:
         if: env.UPDATE_PATCH_VERSION == 'true'
         run: |
           echo "Creating tag and release for version ${{ env.NEW_VERSION }}"
-#          git tag ${{ env.NEW_VERSION }}
-#          git push origin ${{ env.NEW_VERSION }}
-#
-#          # Create a GitHub release
-#          gh release create ${{ env.NEW_VERSION }} --title "Release ${{ env.NEW_VERSION }}" --notes "Auto update for PATCH version" --draft
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}
+
+          # Create a GitHub release
+          gh release create ${{ env.NEW_VERSION }} --title "Release ${{ env.NEW_VERSION }}" --notes "Auto update for PATCH version" --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

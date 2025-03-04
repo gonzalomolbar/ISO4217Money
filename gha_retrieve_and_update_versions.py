@@ -16,11 +16,11 @@ PYPROJECT_PATH = os.path.join(os.path.dirname(__file__), "pyproject.toml")
 
 def _write_to_github_env_file(key: str, value: str):
     print(f"Setting '{key}' to '{value}'")
-    with open(os.getenv("GITHUB_ENV"), "a") as myfile:
+    with open(os.environ["GITHUB_ENV"], "a") as myfile:
         myfile.write(f"{key}={value}\n")
 
 
-def update_patch_version():
+def retrieve_and_update_versions():
     # Load the existing pyproject.toml
     pyproject = toml.load(PYPROJECT_PATH)
 
@@ -75,4 +75,4 @@ def update_patch_version():
 
 
 if __name__ == "__main__":
-    update_patch_version()
+    retrieve_and_update_versions()
