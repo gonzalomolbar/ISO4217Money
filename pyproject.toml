@@ -1,6 +1,6 @@
 [project]
 name = "iso4217-money"
-version = "0.3.20250331"
+version = "0.3.20250512"
 description = ""
 readme = "README.md"
 requires-python = ">=3.12"
